@@ -1,13 +1,14 @@
 package auth
 
 const (
+	idCookieName      = "UserID"
 	sessionCookieName = "Session"
 )
 
 var (
-	sessionStore map[string]int
+	sessionStore map[int]string
 )
 
 func init() {
-	sessionStore = make(map[string]int)
+	sessionStore = make(map[int]string)
 }
