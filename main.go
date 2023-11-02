@@ -21,6 +21,7 @@ func main() {
 	fsRoot := http.Dir("./static/")
 	fs := http.FileServer(fsRoot)
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+	mux.HandleFunc("/signup", ui.Signup)
 	mux.HandleFunc("/", ui.Index)
 	err := http.ListenAndServe(addr, mux)
 	if err != nil {
