@@ -46,6 +46,11 @@ func Init() {
 	if err != nil {
 		log.Fatalf("dal: error creating comments table:\n%s\n", err.Error())
 	}
+	log.Println("dal: creating messages table...")
+	err = createMessagesTable(forumDb)
+	if err != nil {
+		log.Fatalf("dal: error creating messages table:\n%s\n", err.Error())
+	}
 	log.Println("dal: initialised successfully.")
 }
 
@@ -94,6 +99,25 @@ func createCommentsTable(db *sql.DB) error {
 		"ID" INTEGER PRIMARY KEY AUTOINCREMENT,
 		"PostID" INTEGER NOT NULL,
 		"AuthorID" INTEGER NOT NULL,
+		"Author" TEXT NOT NULL,
+		"Content" TEXT NOT NULL,
+		"Timestamp" BIG INTEGER NOT NULL);`
+	statement, err := db.Prepare(queryStr)
+	if err != nil {
+		return err
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createMessagesTable(db *sql.DB) error {
+	queryStr := `CREATE TABLE IF NOT EXISTS "messages" (
+		"ID" INTEGER PRIMARY KEY AUTOINCREMENT,
+		"SenderID" INTEGER NOT NULL,
+		"TargetID" INTEGER NOT NULL,
 		"Author" TEXT NOT NULL,
 		"Content" TEXT NOT NULL,
 		"Timestamp" BIG INTEGER NOT NULL);`
