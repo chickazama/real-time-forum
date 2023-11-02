@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"matthewhope/real-time-forum/dal"
 	"matthewhope/real-time-forum/ui"
 	"net/http"
 )
@@ -10,6 +11,9 @@ const (
 	addr = ":8080"
 )
 
+func init() {
+	dal.Init()
+}
 func main() {
 	// Define multiplexer
 	mux := http.NewServeMux()
