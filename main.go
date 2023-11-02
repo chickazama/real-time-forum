@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"matthewhope/real-time-forum/api"
 	"matthewhope/real-time-forum/dal"
 	"matthewhope/real-time-forum/ui"
 	"net/http"
@@ -21,6 +22,7 @@ func main() {
 	fsRoot := http.Dir("./static/")
 	fs := http.FileServer(fsRoot)
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+	mux.HandleFunc("/api/user", api.GetMyUser)
 	mux.HandleFunc("/signup", ui.Signup)
 	mux.HandleFunc("/", ui.Index)
 	err := http.ListenAndServe(addr, mux)
