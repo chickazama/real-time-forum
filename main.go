@@ -23,6 +23,7 @@ func main() {
 	fs := http.FileServer(fsRoot)
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 	mux.HandleFunc("/api/user", api.GetMyUser)
+	mux.HandleFunc("/api/posts", api.GetPosts)
 	mux.HandleFunc("/signup", ui.Signup)
 	mux.HandleFunc("/login", ui.Login)
 	mux.HandleFunc("/logout", ui.Logout)
