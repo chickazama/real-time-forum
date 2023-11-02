@@ -2,6 +2,7 @@ package ui
 
 import (
 	"log"
+	"matthewhope/real-time-forum/auth"
 	"matthewhope/real-time-forum/dal"
 	"matthewhope/real-time-forum/transport"
 	"net/http"
@@ -12,7 +13,12 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed.\n", http.StatusMethodNotAllowed)
 		return
 	}
-	err := r.ParseForm()
+	_, err := auth.GetUserIDFromSessionCookie(r)
+	if err == nil {
+		http.Error(w, "session already exists.\n", http.StatusNotAcceptable)
+		return
+	}
+	err = r.ParseForm()
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "internal server error.\n", http.StatusInternalServerError)
@@ -35,10 +41,16 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Add User to DB
-	err = dal.CreateUser(dto.Nickname, dto.Age, dto.Gender, dto.FirstName, dto.LastName, dto.Email, dto.Password)
+	userID, err := dal.CreateUser(dto.Nickname, dto.Age, dto.Gender, dto.FirstName, dto.LastName, dto.Email, dto.Password)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "user with details already exists.\n", http.StatusNotAcceptable)
+		return
+	}
+	err = auth.StartSession(w, userID)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "error starting session.\n", http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/", http.StatusSeeOther)
