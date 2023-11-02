@@ -6,6 +6,8 @@ import (
 	"matthewhope/real-time-forum/dal"
 	"matthewhope/real-time-forum/transport"
 	"net/http"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -13,12 +15,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed.\n", http.StatusMethodNotAllowed)
 		return
 	}
-	_, err := auth.GetUserIDFromSessionCookie(r)
-	if err == nil {
-		http.Error(w, "session already exists.\n", http.StatusNotAcceptable)
-		return
-	}
-	err = r.ParseForm()
+	err := r.ParseForm()
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "internal server error.\n", http.StatusInternalServerError)
@@ -40,6 +37,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "invalid details.\n", http.StatusBadRequest)
+		return
+	}
+	// Compare passwords
+	err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPassword), []byte(dto.Password))
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "invalid username or password", http.StatusUnauthorized)
 		return
 	}
 	err = auth.StartSession(w, user.ID)
