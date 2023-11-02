@@ -36,19 +36,67 @@ func Init() {
 	if err != nil {
 		log.Fatalf("dal: error opening forum database:\n%s\n", err.Error())
 	}
+	log.Println("dal: creating posts table...")
+	err = createPostsTable(forumDb)
+	if err != nil {
+		log.Fatalf("dal: error creating posts table:\n%s\n", err.Error())
+	}
+	log.Println("dal: creating comments table...")
+	err = createCommentsTable(forumDb)
+	if err != nil {
+		log.Fatalf("dal: error creating comments table:\n%s\n", err.Error())
+	}
 	log.Println("dal: initialised successfully.")
 }
 
 func createUsersTable(db *sql.DB) error {
 	queryStr := `CREATE TABLE IF NOT EXISTS "users" (
-		"id" INTEGER PRIMARY KEY AUTOINCREMENT,
-		"nickname" TEXT NOT NULL UNIQUE,
-		"age" TEXT NOT NULL,
-		"gender" TEXT NOT NULL,
-		"firstname" TEXT NOT NULL,
-		"lastname" TEXT NOT NULL,
-		"email" TEXT NOT NULL UNIQUE,
-		"encryptedPassword" TEXT NOT NULL);`
+		"ID" INTEGER PRIMARY KEY AUTOINCREMENT,
+		"Nickname" TEXT NOT NULL UNIQUE,
+		"Age" TEXT NOT NULL,
+		"Gender" TEXT NOT NULL,
+		"FirstName" TEXT NOT NULL,
+		"LastName" TEXT NOT NULL,
+		"EmailAddress" TEXT NOT NULL UNIQUE,
+		"EncryptedPassword" TEXT NOT NULL);`
+	statement, err := db.Prepare(queryStr)
+	if err != nil {
+		return err
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createPostsTable(db *sql.DB) error {
+	queryStr := `CREATE TABLE IF NOT EXISTS "posts" (
+		"ID" INTEGER PRIMARY KEY AUTOINCREMENT,
+		"AuthorID" INTEGER NOT NULL,
+		"Author" TEXT NOT NULL,
+		"Content" TEXT NOT NULL,
+		"Categories" TEXT NOT NULL,
+		"Timestamp" BIG INTEGER NOT NULL);`
+	statement, err := db.Prepare(queryStr)
+	if err != nil {
+		return err
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createCommentsTable(db *sql.DB) error {
+	queryStr := `CREATE TABLE IF NOT EXISTS "comments" (
+		"ID" INTEGER PRIMARY KEY AUTOINCREMENT,
+		"PostID" INTEGER NOT NULL,
+		"AuthorID" INTEGER NOT NULL,
+		"Author" TEXT NOT NULL,
+		"Content" TEXT NOT NULL,
+		"Timestamp" BIG INTEGER NOT NULL);`
 	statement, err := db.Prepare(queryStr)
 	if err != nil {
 		return err
