@@ -1,4 +1,7 @@
+import { renderLoginForm } from "../render.js";
+
 export default class SignupForm extends HTMLElement {
+    static observedAttributes = ["active"];
     shadowRoot;
     constructor() {
         super();
@@ -53,5 +56,26 @@ export default class SignupForm extends HTMLElement {
 
     connectedCallback() {
         console.log("Signup Form added to page.");
+        this.shadowRoot.addEventListener("click", redirectHandler);
     }
+
+    disconnectedCallback() {
+        console.log("Signup Form removed from page.");
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        console.log(`Attribute ${name} has changed.`);
+        console.log(`${oldValue} -> ${newValue}`);
+    }
+}
+
+function redirectHandler(event) {
+    if (event.target.id != "redirect") {
+        return;
+    }
+    const root = event.target.getRootNode();
+    const host = root.host;
+    host.setAttribute("active", "false");
+    console.log("Login Redirect");
+    renderLoginForm();
 }
