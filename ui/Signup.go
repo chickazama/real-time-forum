@@ -41,4 +41,5 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "user with details already exists.\n", http.StatusNotAcceptable)
 		return
 	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
