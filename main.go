@@ -24,6 +24,7 @@ func main() {
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 	mux.HandleFunc("/api/user", api.GetMyUser)
 	mux.HandleFunc("/signup", ui.Signup)
+	mux.HandleFunc("/login", ui.Login)
 	mux.HandleFunc("/", ui.Index)
 	err := http.ListenAndServe(addr, mux)
 	if err != nil {
