@@ -25,6 +25,7 @@ func main() {
 	mux.HandleFunc("/api/user", api.GetMyUser)
 	mux.HandleFunc("/signup", ui.Signup)
 	mux.HandleFunc("/login", ui.Login)
+	mux.HandleFunc("/logout", ui.Logout)
 	mux.HandleFunc("/", ui.Index)
 	err := http.ListenAndServe(addr, mux)
 	if err != nil {
