@@ -1,3 +1,5 @@
+import { buildTimeString } from "../app.js";
+
 const codeNewComment = 5;
 
 export default class Post extends HTMLElement {
@@ -12,6 +14,7 @@ export default class Post extends HTMLElement {
         this.User = user;
         this.Data = data;
         this.Socket = socket;
+        const timestamp = buildTimeString(data.timestamp);
         const content =
         `
         <link type="text/css" rel="stylesheet" href="./static/css/posts.css" />
@@ -19,7 +22,7 @@ export default class Post extends HTMLElement {
             <h1>${data.content}</h1>
             <p>${data.categories}</p>
             <p>${data.author}</p>
-            <p>${data.timestamp}</p>
+            <p>${timestamp}</p>
             <div id="send-comment-container">
                 <input type="text" id="comment-content" placeholder="Type a comment..." />
                 <button id="send-comment" type="button">Send Comment</button>
@@ -91,7 +94,7 @@ export default class Post extends HTMLElement {
             `
             <h3>${comment.author}</h3>
             <p>${comment.content}</h1>
-            <p>${comment.timestamp}</p>
+            <p>${buildTimeString(comment.timestamp)}</p>
             `;
             commentsContainer.appendChild(div);
         }
@@ -173,6 +176,7 @@ function sendCommentHandler(event) {
     const contentData = input.value;
     if (contentData.length <= 0) {
         alert("Comment must have content");
+        return;
     }
     let dummyData = {
         postID: host.Data.id,

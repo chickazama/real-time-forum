@@ -1,4 +1,4 @@
-import { renderLoginForm } from "../render.js";
+import { renderLoginForm } from "../app.js";
 
 export default class SignupForm extends HTMLElement {
     static observedAttributes = ["active"];

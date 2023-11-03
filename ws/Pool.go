@@ -87,6 +87,30 @@ func (pool *Pool) Run() {
 				log.Fatal(err.Error())
 			}
 			switch body.Code {
+			case CodeDirectMessage:
+				var dm DirectMessage
+				err = json.Unmarshal([]byte(message.Body), &dm)
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				d := dm.Data
+				id, err := dal.CreateMessage(d.SenderID, d.TargetID, d.Author, d.Content, d.Timestamp)
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				dm.Data.ID = id
+				body, err := json.Marshal(&dm)
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				for client := range pool.Clients {
+					if client.ID == dm.Data.SenderID || client.ID == dm.Data.TargetID {
+						if err := client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(body)}); err != nil {
+							fmt.Println(err)
+							return
+						}
+					}
+				}
 			case CodeNewComment:
 				var c Comment
 				err = json.Unmarshal([]byte(message.Body), &c)

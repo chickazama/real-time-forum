@@ -1,3 +1,11 @@
 .post {
-    background-color: lightcoral;
+    padding: 5px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    background-color: lightblue;
+}
+
+.comment {
+    background-color: white;
 }

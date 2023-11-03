@@ -1,4 +1,4 @@
-import { renderSignupForm } from "../render.js";
+import { renderSignupForm } from "../app.js";
 
 export default class LoginForm extends HTMLElement {
     // Fields
