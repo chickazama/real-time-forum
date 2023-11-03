@@ -100,7 +100,28 @@ func (pool *Pool) Run() {
 						return
 					}
 				}
-
+			case CodeNewPost:
+				var p Post
+				err = json.Unmarshal([]byte(message.Body), &p)
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				d := p.Data
+				id, err := dal.CreatePost(d.AuthorID, d.Author, d.Content, d.Categories, d.Timestamp)
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				p.Data.ID = id
+				body, err := json.Marshal(&p)
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				for client := range pool.Clients {
+					if err := client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(body)}); err != nil {
+						fmt.Println(err)
+						return
+					}
+				}
 			}
 		}
 	}
