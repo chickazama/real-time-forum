@@ -3,11 +3,13 @@ const codeNewComment = 5;
 export default class Post extends HTMLElement {
     static observedAttributes = ["active"];
     shadowRoot;
+    User;
     Data;
     Comments;
     Socket;
-    constructor(data, socket) {
+    constructor(user, data, socket) {
         super();
+        this.User = user;
         this.Data = data;
         this.Socket = socket;
         const content =
@@ -15,9 +17,11 @@ export default class Post extends HTMLElement {
         <link type="text/css" rel="stylesheet" href="./static/css/posts.css" />
         <div class="post" id="post">
             <h1>${data.content}</h1>
+            <p>${data.categories}</p>
             <p>${data.author}</p>
-            <div id="send-comment-container>
-                <input type="text" name="comment-content" placeholder="Type a comment..." />
+            <p>${data.timestamp}</p>
+            <div id="send-comment-container">
+                <input type="text" id="comment-content" placeholder="Type a comment..." />
                 <button id="send-comment" type="button">Send Comment</button>
             </div>
             <button id="display-comments-button">Show Comments</button>
@@ -42,15 +46,22 @@ export default class Post extends HTMLElement {
             case "active":
                 switch(newValue) {
                     case "true":
-                        this.shadowRoot.removeEventListener("click", showCommentsHandler);
-                        this.showCommentsAsync().then( () => {
-                            this.shadowRoot.addEventListener("click", hideCommentsHandler);
-                        });
+                        if (oldValue != "refresh") {
+                            this.shadowRoot.removeEventListener("click", showCommentsHandler);
+                            this.showCommentsAsync().then( () => {
+                                this.shadowRoot.addEventListener("click", hideCommentsHandler);
+                            });
+                        }
                         break;
                     case "false":
                         this.hideComments();
                         this.shadowRoot.removeEventListener("click", hideCommentsHandler);
                         this.shadowRoot.addEventListener("click", showCommentsHandler);
+                        break;
+                    case "refresh":
+                        this.hideComments();
+                        this.showCommentsAsync();
+                        this.setAttribute("active", "true");
                         break;
                 }
                 break;
@@ -91,6 +102,21 @@ export default class Post extends HTMLElement {
         commentsButton.innerText = "Show Comments";
         const commentsContainer = this.shadowRoot.getElementById("comments-container");
         commentsContainer.innerHTML = "";
+    }
+
+    async addCommentAsync(comment) {
+        if (!this.Comments) {
+            this.Comments = [];
+            const data = await this.getCommentsAsync(this.Data.id);
+            if (!data) {
+                return;
+            }
+            for (const item of data) {
+                this.Comments.push(item);
+            }
+            return
+        }
+        this.Comments.push(comment);
     }
 
     async getCommentsAsync(postID) {
@@ -143,12 +169,16 @@ function sendCommentHandler(event) {
     }
     const root = event.target.getRootNode();
     const host = root.host;
-
+    const input = root.getElementById("comment-content");
+    const contentData = input.value;
+    if (contentData.length <= 0) {
+        alert("Comment must have content");
+    }
     let dummyData = {
         postID: host.Data.id,
-        authorID: 1,
-        author: "Matthew",
-        content: "Test Comment",
+        authorID: host.User.id,
+        author: host.User.nickname,
+        content: contentData,
         timestamp: Math.floor(Date.now() / 1000)
     };
 

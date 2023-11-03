@@ -4,10 +4,12 @@ export default class CreatePostForm extends HTMLElement {
     // Fields
     static observedAttributes = ["active"];
     shadowRoot;
+    User;
     Socket;
     // Methods
-    constructor(socket) {
+    constructor(user, socket) {
         super();
+        this.User = user;
         this.Socket = socket;
         let content = `
         <link type="text/css" rel="stylesheet" href="./static/css/forms.css" />
@@ -79,9 +81,9 @@ function sendPostHandler(event) {
         return;
     }
     let catData = cat.join(", ");
-    let dummyData = {
-        authorID: 1,
-        author: "Matthew",
+    let postData = {
+        authorID: host.User.id,
+        author: host.User.nickname,
         content: contentData,
         categories: catData,
         timestamp: Math.floor(Date.now() / 1000)
@@ -89,7 +91,7 @@ function sendPostHandler(event) {
 
     let body = {
         code: codeNewPost,
-        data: dummyData
+        data: postData
     };
     host.Socket.send(JSON.stringify(body));
 }

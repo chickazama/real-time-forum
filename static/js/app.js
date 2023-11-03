@@ -10,6 +10,10 @@ customElements.define("login-form", LoginForm);
 customElements.define("post-element", Post);
 
 const codeNewPost = 4;
+const codeNewComment = 5;
+
+const header = document.getElementById("header");
+const main = document.getElementById("main");
 
 let user;
 let socket;
@@ -23,18 +27,17 @@ window.addEventListener("load", async () => {
     }
     let data = await res.json();
     user = data;
-    main.innerText = `Welcome ${data.nickname}`;
     let logout = document.createElement("a");
     logout.innerText = "Logout";
     logout.href="/logout";
-    main.appendChild(logout);
+    header.appendChild(logout);
     setupWebSocket();
-    let postForm = new CreatePostForm(socket);
-    main.appendChild(postForm);
+    let postForm = new CreatePostForm(user, socket);
+    header.appendChild(postForm);
     let postsData = await getPostsAsync();
     for (const item of postsData) {
         console.log(item);
-        const post = new Post(item, socket);
+        const post = new Post(user, item, socket);
         main.appendChild(post);
         posts.set(item.id, post);
     }
@@ -58,7 +61,7 @@ function setupWebSocket() {
     socket.onclose = () => {
         console.log("Socket closed.");
     }
-    socket.onmessage = (e) => {
+    socket.onmessage = async (e) => {
         // console.log(e.data);
         const message = JSON.parse(e.data);
         const body = JSON.parse(message.body);
@@ -66,10 +69,17 @@ function setupWebSocket() {
             case codeNewPost:
                 console.log("New Post - Data");
                 console.log(body.data);
+                const newPost = new Post(user, body.data, socket);
+                posts.set(body.data.id, newPost);
+                main.prepend(newPost);
                 break;
-            case 5:
+            case codeNewComment:
                 console.log("New Comment - Data:");
-                console.log(body.data);
+                const post = posts.get(body.data.postID);
+                await post.addCommentAsync(body.data);
+                if (post.getAttribute("active") == "true") {
+                    post.setAttribute("active", "refresh");
+                }
                 break;
         }
     }
