@@ -2,7 +2,7 @@ package dal
 
 func CreatePost(authorID int, author, content, categories string, timestamp int64) (int, error) {
 	var result int
-	queryStr := `INSERT INTO "posts" (AuthorID, Author, Content, Categories, Timestamp) VALUES(?, ?, ?, ?, ?);`
+	queryStr := `INSERT INTO "posts" (AuthorID, Author, Content, Categories, Timestamp) VALUES (?, ?, ?, ?, ?);`
 	stmt, err := forumDb.Prepare(queryStr)
 	if err != nil {
 		return result, err
