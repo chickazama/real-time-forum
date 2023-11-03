@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"matthewhope/real-time-forum/dal"
-	"matthewhope/real-time-forum/transport"
 
 	"github.com/gorilla/websocket"
 )
@@ -31,43 +30,53 @@ func (pool *Pool) Run() {
 		select {
 		case client := <-pool.Login:
 			pool.Clients[client] = true
-			joinedClient := transport.UserResponse{
-				ID:       client.ID,
-				Nickname: client.Nickname,
+			joinedClient := User{
+				Code: CodeUserLogin,
+				Data: UserData{
+					ID:       client.ID,
+					Nickname: client.Nickname,
+				},
 			}
 			jsonRes, err := json.Marshal(&joinedClient)
 			if err != nil {
 				log.Fatal(err.Error())
 			}
 			fmt.Println("Size of Connection Pool: ", len(pool.Clients))
-			var onlineList []transport.UserResponse
+			onlineClients := Users{
+				Code: CodeListOnlineUsers,
+				Data: []UserData{},
+			}
 			// Notify all clients of a user join
 			for client := range pool.Clients {
-				nextClient := transport.UserResponse{
+				nextClient := UserData{
 					ID:       client.ID,
 					Nickname: client.Nickname,
 				}
-				onlineList = append(onlineList, nextClient)
+				onlineClients.Data = append(onlineClients.Data, nextClient)
 				client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(jsonRes)})
 			}
 			// Tell this client all connected users
 			// msgBody := fmt.Sprintf("Users Online: %d", len(pool.Clients))
-			jsonBody, err := json.Marshal(&onlineList)
+			jsonBody, err := json.Marshal(&onlineClients)
 			if err != nil {
 				log.Fatal(err.Error())
 			}
 			client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(jsonBody)})
 		case client := <-pool.Logout:
-			loggedOutClient := transport.UserResponse{
-				ID:       client.ID,
-				Nickname: client.Nickname,
+			disconnectedClient := User{
+				Code: CodeUserLogout,
+				Data: UserData{
+					ID:       client.ID,
+					Nickname: client.Nickname,
+				},
 			}
-			jsonRes, err := json.Marshal(&loggedOutClient)
+			jsonRes, err := json.Marshal(&disconnectedClient)
 			if err != nil {
 				log.Fatal(err.Error())
 			}
 			delete(pool.Clients, client)
 			fmt.Println("Size of Connection Pool: ", len(pool.Clients))
+			// Notify all clients of a user logout
 			for client := range pool.Clients {
 				client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(jsonRes)})
 			}
