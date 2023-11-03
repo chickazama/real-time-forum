@@ -1,9 +1,11 @@
+import CreatePostForm from "./components/CreatePostForm.js";
 import LoginForm from "./components/LoginForm.js";
 import Post from "./components/Post.js";
 import SignupForm from "./components/SignupForm.js";
 import { renderLoginForm, renderSignupForm } from "./render.js";
 
 customElements.define("signup-form", SignupForm);
+customElements.define("create-post-form", CreatePostForm);
 customElements.define("login-form", LoginForm);
 customElements.define("post-element", Post);
 
@@ -27,6 +29,8 @@ window.addEventListener("load", async () => {
     logout.href="/logout";
     main.appendChild(logout);
     setupWebSocket();
+    let postForm = new CreatePostForm(socket);
+    main.appendChild(postForm);
     let postsData = await getPostsAsync();
     for (const item of postsData) {
         console.log(item);
@@ -60,11 +64,8 @@ function setupWebSocket() {
         const body = JSON.parse(message.body);
         switch (body.code) {
             case codeNewPost:
-                console.log(msg.body.body.id);
-                console.log(msg.body.body.authorID);
-                console.log(msg.body.body.content);
-                console.log(msg.body.body.categories);
-                console.log(msg.body.body.timestamp);
+                console.log("New Post - Data");
+                console.log(body.data);
                 break;
             case 5:
                 console.log("New Comment - Data:");
