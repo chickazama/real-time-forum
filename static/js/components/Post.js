@@ -1,3 +1,5 @@
+const codeNewComment = 5;
+
 export default class Post extends HTMLElement {
     static observedAttributes = ["active"];
     shadowRoot;
@@ -61,7 +63,7 @@ export default class Post extends HTMLElement {
         const commentsContainer = this.shadowRoot.getElementById("comments-container");
         if (!this.Comments) {
             this.Comments = [];
-            const data = await this.getCommentsAsync();
+            const data = await this.getCommentsAsync(this.Data.id);
             if (!data) {
                 return;
             }
@@ -78,7 +80,7 @@ export default class Post extends HTMLElement {
             `
             <h3>${comment.author}</h3>
             <p>${comment.content}</h1>
-            <p>${comment.date}</p>
+            <p>${comment.timestamp}</p>
             `;
             commentsContainer.appendChild(div);
         }
@@ -91,7 +93,7 @@ export default class Post extends HTMLElement {
         commentsContainer.innerHTML = "";
     }
 
-    async getCommentsAsync() {
+    async getCommentsAsync(postID) {
         try {
             const response = await fetch("/api/comments", {
                 method: "POST",
@@ -101,7 +103,7 @@ export default class Post extends HTMLElement {
                 },
                 body: new URLSearchParams( 
                     {
-                        "postID":  this.ID
+                        "postID":  postID
                     }
                 )
             });
@@ -136,10 +138,23 @@ function hideCommentsHandler(event) {
 }
 
 function sendCommentHandler(event) {
-    if (event.target.id != "send-comment-button") {
+    if (event.target.id != "send-comment") {
         return;
     }
     const root = event.target.getRootNode();
     const host = root.host;
-    host.socket.send()
+
+    let dummyData = {
+        postID: host.Data.id,
+        authorID: 1,
+        author: "Matthew",
+        content: "Test Comment",
+        timestamp: Math.floor(Date.now() / 1000)
+    };
+
+    let body = {
+        code: codeNewComment,
+        data: dummyData
+    };
+    host.Socket.send(JSON.stringify(body));
 }
