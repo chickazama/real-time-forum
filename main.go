@@ -25,7 +25,7 @@ func main() {
 	fs := http.FileServer(fsRoot)
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 	mux.HandleFunc("/api/user", api.GetMyUser)
-	mux.HandleFunc("/api/users", api.GetAllUsers)
+	mux.Handle("/api/users", api.NewUsersHandler())
 	mux.HandleFunc("/api/posts", api.GetPosts)
 	mux.HandleFunc("/api/comments", api.GetCommentsByPostID)
 	mux.HandleFunc("/api/messages", api.GetChat)

@@ -1,11 +1,14 @@
 package dal
 
-import "matthewhope/real-time-forum/models"
+import (
+	"database/sql"
+	"matthewhope/real-time-forum/models"
+)
 
-func GetAllUsers() ([]models.User, error) {
+func GetAllUsers(db *sql.DB) ([]models.User, error) {
 	var result []models.User
 	queryStr := `SELECT * FROM users ORDER BY Nickname ASC;`
-	rows, err := identityDb.Query(queryStr)
+	rows, err := db.Query(queryStr)
 	if err != nil {
 		return result, err
 	}
