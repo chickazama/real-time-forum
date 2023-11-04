@@ -20,3 +20,7 @@ func (r *DummyRepository) GetUserByID(id int) (models.User, error) {
 func (r *DummyRepository) GetUsers() ([]models.User, error) {
 	return GetAllUsers(r.db)
 }
+
+func (r *DummyRepository) GetMessagesBySenderAndTargetIDs(senderID, targetID int) ([]models.Message, error) {
+	return GetMessagesBySenderAndTargetIDs(senderID, targetID)
+}

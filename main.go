@@ -29,7 +29,6 @@ func main() {
 
 	mux.HandleFunc("/api/posts", api.GetPosts)
 	mux.HandleFunc("/api/comments", api.GetCommentsByPostID)
-	mux.HandleFunc("/api/messages", api.GetChat)
 	mux.HandleFunc("/signup", ui.Signup)
 	mux.HandleFunc("/login", ui.Login)
 	mux.HandleFunc("/logout", ui.Logout)
@@ -46,4 +45,6 @@ func setupHandlers(mux *http.ServeMux) {
 	mux.Handle("/websocket", ws.NewWebSocketHandler(repo))
 	mux.Handle("/api/user", api.NewUserHandler(repo))
 	mux.Handle("/api/users", api.NewUsersHandler(repo))
+	mux.Handle("/api/messages", api.NewChatHandler(repo))
+
 }
