@@ -4,6 +4,7 @@ import (
 	"log"
 	"matthewhope/real-time-forum/api"
 	"matthewhope/real-time-forum/dal"
+	"matthewhope/real-time-forum/repo"
 	"matthewhope/real-time-forum/ui"
 	"matthewhope/real-time-forum/ws"
 	"net/http"
@@ -39,7 +40,7 @@ func main() {
 }
 
 func setupHandlers(mux *http.ServeMux) {
-	repo := dal.NewDummyRepository()
+	repo := repo.NewDummyRepository()
 	mux.Handle("/websocket", ws.NewWebSocketHandler(repo))
 	mux.Handle("/api/user", api.NewUserHandler(repo))
 	mux.Handle("/api/users", api.NewUsersHandler(repo))

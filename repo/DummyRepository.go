@@ -1,34 +1,33 @@
-package dal
+package repo
 
 import (
-	"database/sql"
+	"matthewhope/real-time-forum/dal"
 	"matthewhope/real-time-forum/models"
 )
 
 type DummyRepository struct {
-	db *sql.DB
 }
 
 func NewDummyRepository() *DummyRepository {
-	return &DummyRepository{db: identityDb}
+	return &DummyRepository{}
 }
 
 func (r *DummyRepository) GetUserByID(id int) (models.User, error) {
-	return GetUserByID(r.db, id)
+	return dal.GetUserByID(id)
 }
 
 func (r *DummyRepository) GetUsers() ([]models.User, error) {
-	return GetAllUsers(r.db)
+	return dal.GetAllUsers()
 }
 
 func (r *DummyRepository) GetMessagesBySenderAndTargetIDs(senderID, targetID int) ([]models.Message, error) {
-	return GetMessagesBySenderAndTargetIDs(senderID, targetID)
+	return dal.GetMessagesBySenderAndTargetIDs(senderID, targetID)
 }
 
 func (r *DummyRepository) GetPosts() ([]models.Post, error) {
-	return GetAllPosts()
+	return dal.GetAllPosts()
 }
 
 func (r *DummyRepository) GetCommentsByPostID(postID int) ([]models.Comment, error) {
-	return GetCommentsByPostID(postID)
+	return dal.GetCommentsByPostID(postID)
 }
