@@ -6,7 +6,6 @@ import (
 	"matthewhope/real-time-forum/dal"
 	"matthewhope/real-time-forum/ws"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/websocket"
 )
@@ -17,22 +16,9 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad request.\n", http.StatusBadRequest)
 		return
 	}
-	idCookie, err := r.Cookie("UserID")
+	userID, err := auth.AuthorizeRequest(r)
 	if err != nil {
-		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
-		return
-	}
-	userID, err := strconv.Atoi(idCookie.Value)
-	if err != nil {
-		http.Error(w, "bad request.\n", http.StatusBadRequest)
-		return
-	}
-	sessionCookie, err := r.Cookie("Session")
-	if err != nil {
-		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
-		return
-	}
-	if !auth.ValidateSessionCookie(userID, sessionCookie.Value) {
+		log.Println(err.Error())
 		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
 		return
 	}

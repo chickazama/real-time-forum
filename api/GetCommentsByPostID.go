@@ -14,24 +14,8 @@ func GetCommentsByPostID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed.\n", http.StatusMethodNotAllowed)
 		return
 	}
-	idCookie, err := r.Cookie("UserID")
+	_, err := auth.AuthorizeRequest(r)
 	if err != nil {
-		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
-		return
-	}
-	userID, err := strconv.Atoi(idCookie.Value)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "bad request.\n", http.StatusBadRequest)
-		return
-	}
-	sessionCookie, err := r.Cookie("Session")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
-		return
-	}
-	if !auth.ValidateSessionCookie(userID, sessionCookie.Value) {
 		log.Println(err.Error())
 		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
 		return

@@ -14,27 +14,10 @@ func GetChat(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed.\n", http.StatusMethodNotAllowed)
 		return
 	}
-	idCookie, err := r.Cookie("UserID")
-	if err != nil {
-		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
-		return
-	}
-	userID, err := strconv.Atoi(idCookie.Value)
-	if err != nil {
-		log.Println("here")
-		log.Println(err.Error())
-		http.Error(w, "bad request.\n", http.StatusBadRequest)
-		return
-	}
-	sessionCookie, err := r.Cookie("Session")
+	userID, err := auth.AuthorizeRequest(r)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
-		return
-	}
-	if !auth.ValidateSessionCookie(userID, sessionCookie.Value) {
-		log.Println(err.Error())
-		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
+		http.Error(w, "internal server error.\n", http.StatusInternalServerError)
 		return
 	}
 	err = r.ParseForm()
