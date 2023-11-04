@@ -24,3 +24,7 @@ func (r *DummyRepository) GetUsers() ([]models.User, error) {
 func (r *DummyRepository) GetMessagesBySenderAndTargetIDs(senderID, targetID int) ([]models.Message, error) {
 	return GetMessagesBySenderAndTargetIDs(senderID, targetID)
 }
+
+func (r *DummyRepository) GetPosts() ([]models.Post, error) {
+	return GetAllPosts()
+}
