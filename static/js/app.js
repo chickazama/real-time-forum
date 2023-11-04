@@ -2,6 +2,7 @@ import Chat from "./components/Chat.js";
 import Contact from "./components/Contact.js";
 import CreatePostForm from "./components/CreatePostForm.js";
 import LoginForm from "./components/LoginForm.js";
+import Navbar from "./components/Navbar.js";
 import Post from "./components/Post.js";
 import SignupForm from "./components/SignupForm.js";
 
@@ -11,6 +12,7 @@ customElements.define("login-form", LoginForm);
 customElements.define("post-element", Post);
 customElements.define("chat-element", Chat);
 customElements.define("contact-element", Contact);
+customElements.define("navbar-element", Navbar);
 
 const codeListOnlineUsers = 1;
 const codeUserLogin = 2;
@@ -46,10 +48,7 @@ window.addEventListener("load", async () => {
             users.set(item.id, new Contact(user, item));
         }
     }
-    let logout = document.createElement("a");
-    logout.innerText = "Logout";
-    logout.href="/logout";
-    header.appendChild(logout);
+    nav.appendChild(new Navbar(user));
     setupWebSocket();
     let postForm = new CreatePostForm(user, socket);
     header.appendChild(postForm);

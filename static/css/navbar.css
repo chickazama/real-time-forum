@@ -1,0 +1,27 @@
+.navbar {
+    display: inline-flex;
+    width: 100%;
+}
+
+.nav-item {
+    align-self: flex-end;
+    flex-grow: 1;
+    font-size: 16px;
+    list-style-type: none;
+}
+
+a {
+    color: darkgreen;
+    text-decoration: none;
+}
+
+.nav-link {
+    padding: 5px 20px 5px 20px;
+    text-decoration: none;
+    color: darkgreen;
+}
+
+.nav-link:hover {
+    color: mintcream;
+    background-color: darkolivegreen;
+}
