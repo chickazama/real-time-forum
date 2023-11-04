@@ -7,4 +7,5 @@ type IRepository interface {
 	GetUserByID(id int) (models.User, error)
 	GetMessagesBySenderAndTargetIDs(userID, targetID int) ([]models.Message, error)
 	GetPosts() ([]models.Post, error)
+	GetCommentsByPostID(postID int) ([]models.Comment, error)
 }

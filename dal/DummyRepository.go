@@ -28,3 +28,7 @@ func (r *DummyRepository) GetMessagesBySenderAndTargetIDs(senderID, targetID int
 func (r *DummyRepository) GetPosts() ([]models.Post, error) {
 	return GetAllPosts()
 }
+
+func (r *DummyRepository) GetCommentsByPostID(postID int) ([]models.Comment, error) {
+	return GetCommentsByPostID(postID)
+}

@@ -27,7 +27,6 @@ func main() {
 	fs := http.FileServer(fsRoot)
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	mux.HandleFunc("/api/comments", api.GetCommentsByPostID)
 	mux.HandleFunc("/signup", ui.Signup)
 	mux.HandleFunc("/login", ui.Login)
 	mux.HandleFunc("/logout", ui.Logout)
@@ -46,4 +45,5 @@ func setupHandlers(mux *http.ServeMux) {
 	mux.Handle("/api/users", api.NewUsersHandler(repo))
 	mux.Handle("/api/messages", api.NewChatHandler(repo))
 	mux.Handle("/api/posts", api.NewPostsHandler(repo))
+	mux.Handle("/api/comments", api.NewCommentsHandler(repo))
 }

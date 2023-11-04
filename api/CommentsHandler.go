@@ -4,16 +4,20 @@ import (
 	"encoding/json"
 	"log"
 	"matthewhope/real-time-forum/auth"
-	"matthewhope/real-time-forum/dal"
+	"matthewhope/real-time-forum/repo"
 	"net/http"
 	"strconv"
 )
 
-func GetCommentsByPostID(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed.\n", http.StatusMethodNotAllowed)
-		return
-	}
+type CommentsHandler struct {
+	Repo repo.IRepository
+}
+
+func NewCommentsHandler(r repo.IRepository) *CommentsHandler {
+	return &CommentsHandler{Repo: r}
+}
+
+func (h *CommentsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_, err := auth.AuthorizeRequest(r)
 	if err != nil {
 		log.Println(err.Error())
@@ -32,7 +36,7 @@ func GetCommentsByPostID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad request.\n", http.StatusBadRequest)
 		return
 	}
-	comments, err := dal.GetCommentsByPostID(postID)
+	comments, err := h.Repo.GetCommentsByPostID(postID)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "internal server error.\n", http.StatusInternalServerError)
