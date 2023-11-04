@@ -40,7 +40,7 @@ func main() {
 }
 
 func setupHandlers(mux *http.ServeMux) {
-	repo := repo.NewDummyRepository()
+	repo := repo.NewSQLiteRepository()
 	mux.Handle("/websocket", ws.NewWebSocketHandler(repo))
 	mux.Handle("/api/user", api.NewUserHandler(repo))
 	mux.Handle("/api/users", api.NewUsersHandler(repo))
