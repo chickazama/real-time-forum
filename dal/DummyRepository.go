@@ -14,5 +14,9 @@ func NewDummyRepository() *DummyRepository {
 }
 
 func (r *DummyRepository) GetUserByID(id int) (models.User, error) {
-	return GetUserByID(id)
+	return GetUserByID(r.db, id)
+}
+
+func (r *DummyRepository) GetUsers() ([]models.User, error) {
+	return GetAllUsers(r.db)
 }

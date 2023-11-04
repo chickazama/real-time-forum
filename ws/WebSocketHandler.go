@@ -1,17 +1,23 @@
-package ui
+package ws
 
 import (
 	"log"
 	"matthewhope/real-time-forum/auth"
-	"matthewhope/real-time-forum/dal"
-	"matthewhope/real-time-forum/ws"
+	"matthewhope/real-time-forum/repo"
 	"net/http"
 
 	"github.com/gorilla/websocket"
 )
 
-func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
-	// Check correct HTTP method
+type WebSocketHandler struct {
+	Repo repo.IRepository
+}
+
+func NewWebSocketHandler(r repo.IRepository) *WebSocketHandler {
+	return &WebSocketHandler{Repo: r}
+}
+
+func (h *WebSocketHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "bad request.\n", http.StatusBadRequest)
 		return
@@ -22,7 +28,7 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
 		return
 	}
-	user, err := dal.GetUserByID(userID)
+	user, err := h.Repo.GetUserByID(userID)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "internal server error.\n", http.StatusInternalServerError)
@@ -38,11 +44,11 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error.\n", http.StatusInternalServerError)
 		return
 	}
-	client := ws.Client{
+	client := Client{
 		ID:       userID,
 		Nickname: user.Nickname,
 		Conn:     conn,
-		Pool:     ws.ClientPool,
+		Pool:     ClientPool,
 	}
 	client.Pool.Login <- &client
 	go client.Read()

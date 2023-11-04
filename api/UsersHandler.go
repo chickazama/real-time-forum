@@ -4,18 +4,17 @@ import (
 	"encoding/json"
 	"log"
 	"matthewhope/real-time-forum/auth"
-	"matthewhope/real-time-forum/dal"
 	"matthewhope/real-time-forum/repo"
 	"matthewhope/real-time-forum/transport"
 	"net/http"
 )
 
 type UsersHandler struct {
-	GetUsersRepo repo.GetUsersRepository
+	Repo repo.IRepository
 }
 
-func NewUsersHandler() *UsersHandler {
-	return &UsersHandler{GetUsersRepo: dal.NewDefaultGetUsersRepository()}
+func NewUsersHandler(r repo.IRepository) *UsersHandler {
+	return &UsersHandler{Repo: r}
 }
 
 func (h *UsersHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +24,7 @@ func (h *UsersHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
 		return
 	}
-	users, err := h.GetUsersRepo.GetUsers()
+	users, err := h.Repo.GetUsers()
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "error retrieving users from database.\n", http.StatusInternalServerError)
