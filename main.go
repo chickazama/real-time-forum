@@ -17,6 +17,7 @@ func init() {
 	dal.Init()
 	ws.Setup()
 }
+
 func main() {
 	// Define multiplexer
 	mux := http.NewServeMux()
@@ -24,8 +25,9 @@ func main() {
 	fsRoot := http.Dir("./static/")
 	fs := http.FileServer(fsRoot)
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
-	mux.HandleFunc("/api/user", api.GetMyUser)
+	mux.Handle("/api/user", api.NewUserHandler(dal.NewDummyRepository()))
 	mux.Handle("/api/users", api.NewUsersHandler())
+
 	mux.HandleFunc("/api/posts", api.GetPosts)
 	mux.HandleFunc("/api/comments", api.GetCommentsByPostID)
 	mux.HandleFunc("/api/messages", api.GetChat)

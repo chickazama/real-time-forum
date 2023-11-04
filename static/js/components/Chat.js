@@ -2,6 +2,7 @@ import { buildTimeString, renderUsers } from "../app.js";
 
 const codeNewDirectMessage = 6;
 
+
 export default class Chat extends HTMLElement {
     static observedAttributes = ["active"];
     shadowRoot;
@@ -18,14 +19,12 @@ export default class Chat extends HTMLElement {
         const content =
         `
         <link type="text/css" rel="stylesheet" href="./static/css/chat.css" />
-        <div class="user-card">
-            <button id="redirect" type="button">Back to Contacts</button>
-            <h5>${target.nickname}</h5>
-            <div id="send-message-container">
-                <input type="text" id="message-content" placeholder="Type a message..." />
-                <button id="send-message" type="button">Send Message</button>
-            </div>
-            <div id="messages-container"></div>
+        <button id="redirect" type="button">Back to Contacts</button>
+        <h5>${target.nickname}</h5>
+        <div id="messages-container"></div>
+        <div id="send-message-container">
+            <input type="text" id="message-content" placeholder="Type a message..." />
+            <button id="send-message" type="button">Send Message</button>
         </div>
         `;
         const template = document.createElement("template");

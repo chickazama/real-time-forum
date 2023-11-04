@@ -19,14 +19,18 @@ body {
 #main {
     grid-row: 2;
     grid-column: 1 / 3;
-    max-height: 100vh;
+    max-height: 70vh;
     overflow-y: scroll;
 }
 
 #chat {
     grid-row: 2;
     grid-column: 3;
-    max-height: 100vh;
+    max-height: 70vh;
     overflow-y: scroll;
     background-color: lightblue;
 }
+
+/* chat-element {
+    display: flex;
+} */

@@ -4,40 +4,35 @@ import (
 	"encoding/json"
 	"log"
 	"matthewhope/real-time-forum/auth"
-	"matthewhope/real-time-forum/dal"
 	"matthewhope/real-time-forum/repo"
 	"matthewhope/real-time-forum/transport"
 	"net/http"
 )
 
-type UsersHandler struct {
-	GetUsersRepo repo.GetUsersRepository
+type UserHandler struct {
+	Repo repo.IRepository
 }
 
-func NewUsersHandler() *UsersHandler {
-	return &UsersHandler{GetUsersRepo: dal.NewDefaultGetUsersRepository()}
+func NewUserHandler(r repo.IRepository) *UserHandler {
+	return &UserHandler{Repo: r}
 }
 
-func (h *UsersHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	_, err := auth.AuthorizeRequest(r)
+func (h *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	userID, err := auth.AuthorizeRequest(r)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "unauthorized.\n", http.StatusUnauthorized)
 		return
 	}
-	users, err := h.GetUsersRepo.GetUsers()
+	user, err := h.Repo.GetUserByID(userID)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "error retrieving users from database.\n", http.StatusInternalServerError)
 		return
 	}
-	var res []transport.UserResponse
-	for _, user := range users {
-		dto := transport.UserResponse{
-			ID:       user.ID,
-			Nickname: user.Nickname,
-		}
-		res = append(res, dto)
+	res := transport.UserResponse{
+		ID:       user.ID,
+		Nickname: user.Nickname,
 	}
 	enc := json.NewEncoder(w)
 	err = enc.Encode(&res)

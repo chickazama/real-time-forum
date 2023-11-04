@@ -1,6 +1,5 @@
 .message {
     box-sizing: border-box;
-    background-color: white;
     padding: 5px;
     margin-top: 2px;
     margin-bottom: 2px;
@@ -13,4 +12,13 @@
     margin-bottom: 3px;
     padding: 2px;
     background-color: white;
+}
+
+#messages-container {
+    box-sizing: border-box;
+    border-radius: 5px;
+    min-height: 75%;
+    max-height: 75%;
+    overflow-y: scroll;
+    width: 100%;
 }
