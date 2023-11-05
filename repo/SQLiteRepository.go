@@ -24,6 +24,10 @@ func (r *SQLiteRepository) GetMessagesBySenderAndTargetIDs(senderID, targetID in
 	return dal.GetMessagesBySenderAndTargetIDs(senderID, targetID)
 }
 
+func (r *SQLiteRepository) GetLimitedMessagesBySenderAndTargetIDs(senderID, targetID, limit, offset int) ([]models.Message, error) {
+	return dal.GetLimitedMessagesBySenderAndTargetIDs(senderID, targetID, limit, offset)
+}
+
 func (r *SQLiteRepository) GetPosts() ([]models.Post, error) {
 	return dal.GetAllPosts()
 }
