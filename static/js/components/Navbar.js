@@ -7,14 +7,14 @@ export default class Navbar extends HTMLElement {
         const content =
         `
         <link type="text/css" rel="stylesheet" href="./static/css/navbar.css" />
-        <ul class="navbar">
-            <li class="nav-item">
+        <div class="container">
+            <span class="nav-item">
                 <span class="nav-link">${user.nickname}</span>
-            </li>
-            <li class="nav-item">
+            </span>
+            <span class="nav-item">
                 <a class="nav-link" href="/logout">Log Out</a>
-            </li>
-        </ul>
+            </span>
+        </div>
         `;
         const template = document.createElement("template");
         template.innerHTML = content;

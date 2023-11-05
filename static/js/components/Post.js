@@ -191,4 +191,5 @@ function sendCommentHandler(event) {
         data: dummyData
     };
     host.Socket.send(JSON.stringify(body));
+    input.value = "";
 }

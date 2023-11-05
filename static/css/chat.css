@@ -1,17 +1,42 @@
-.message {
+* {
+    box-sizing: border-box;
+}
+
+.chat-title {
+    text-align: center;
+}
+
+#messages-container {
     box-sizing: border-box;
     padding: 5px;
+}
+
+.message {
+    border-radius: 5px;
+    box-sizing: border-box;
+    padding: 2px;
     margin-top: 2px;
     margin-bottom: 2px;
 }
 
-.contact {
-    box-sizing: border-box;
-    border-radius: 5px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    padding: 2px;
-    background-color: white;
+.timestamp {
+    font-size: x-small;
+}
+
+.sent {
+    position: relative;
+    width: 75%;
+    left: 2%;
+    background-color: lightblue;
+    text-align: left;
+}
+
+.received {
+    position: relative;
+    width: 75%;
+    left: 23%;
+    background-color: beige;
+    text-align: right;
 }
 
 #messages-container {
@@ -19,8 +44,23 @@
     flex-direction: column-reverse;
     box-sizing: border-box;
     border-radius: 5px;
-    min-height: 75%;
-    max-height: 75%;
+    min-height: 52vh;
+    max-height: 52vh;
     overflow-y: scroll;
     width: 100%;
+}
+
+.contact {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    padding: 2px;
+    background-color: lightblue;
+}
+
+hr {
+    background-color: lightblue;
+    color: lightblue;
 }

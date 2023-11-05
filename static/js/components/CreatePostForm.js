@@ -94,4 +94,5 @@ function sendPostHandler(event) {
         data: postData
     };
     host.Socket.send(JSON.stringify(body));
+    input.value = "";
 }

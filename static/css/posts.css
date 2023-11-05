@@ -1,8 +1,12 @@
-.post {
-    padding: 5px;
+* {
     box-sizing: border-box;
-    border-radius: 5px;
+}
+
+.post {
+    width: 100%;
+    padding: 5px;
     margin-bottom: 5px;
+    border-radius: 5px;
     background-color: lightblue;
 }
 

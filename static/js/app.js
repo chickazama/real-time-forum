@@ -48,11 +48,16 @@ window.addEventListener("load", async () => {
             users.set(item.id, new Contact(user, item));
         }
     }
+    const navbar = new Navbar(user);
+    navbar.classList.add("container");
     nav.appendChild(new Navbar(user));
     setupWebSocket();
     let postForm = new CreatePostForm(user, socket);
     header.appendChild(postForm);
     let postsData = await getPostsAsync();
+    // const title = document.createElement("h3");
+    // title.innerText = "Posts";
+    // main.appendChild(title);
     for (const item of postsData) {
         console.log(item);
         const post = new Post(user, item, socket);
@@ -207,6 +212,9 @@ export function renderUsers() {
             offlineDiv.appendChild(contact);
         }
     }
+    // const title = document.createElement("h3");
+    // title.innerText = "Chat";
+    // chat.appendChild(title);
     chat.appendChild(onlineDiv);
     chat.appendChild(document.createElement("hr"));
     chat.appendChild(offlineDiv);
@@ -233,7 +241,9 @@ export function renderChat(sender, target) {
     contactsActive = false;
     activeChatID = target.id;
     chat.innerHTML = "";
-    
+    // const title = document.createElement("h3");
+    // title.innerText = "Chat";
+    // chat.appendChild(title);
     chat.appendChild(chatElem);
 }
 

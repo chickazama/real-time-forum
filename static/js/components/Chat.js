@@ -21,7 +21,8 @@ export default class Chat extends HTMLElement {
         `
         <link type="text/css" rel="stylesheet" href="./static/css/chat.css" />
         <button id="redirect" type="button">Back to Contacts</button>
-        <h5>${target.nickname}</h5>
+        <h5 class="chat-title">${target.nickname}</h5>
+        <hr />
         <div id="messages-container"></div>
         <div id="send-message-container">
             <input type="text" id="message-content" placeholder="Type a message..." />
@@ -69,11 +70,16 @@ export default class Chat extends HTMLElement {
         for (const message of this.Messages) {
             const div = document.createElement("div");
             div.classList.add("message");
+            if (message.senderID === this.Sender.id) {
+                div.classList.add("sent");
+            } else {
+                div.classList.add("received");
+            }
             div.innerHTML =
             `
             <h5>${message.author}</h5>
             <h3>${message.content}</h3>
-            <p>${buildTimeString(message.timestamp)}</p>
+            <p class="timestamp">${buildTimeString(message.timestamp)}</p>
             `;
             messagesContainer.appendChild(div);
         }
@@ -101,15 +107,23 @@ export default class Chat extends HTMLElement {
         if(Math.abs((container.offsetHeight - container.scrollHeight)- container.scrollTop) < 5) {
             console.log("Scrolled to top");
             host.getMessagesAsync(host.Target.id, host.Offset).then((data) => {
+                if (!data) {
+                    return;
+                }
                 for (const message of data) {
                     host.Messages.push(message);
                     const div = document.createElement("div");
                     div.classList.add("message");
+                    if (message.senderID === host.Sender.id) {
+                        div.classList.add("sent");
+                    } else {
+                        div.classList.add("received");
+                    }
                     div.innerHTML =
                     `
                     <h5>${message.author}</h5>
                     <h3>${message.content}</h3>
-                    <p>${buildTimeString(message.timestamp)}</p>
+                    <p class="timestamp">${buildTimeString(message.timestamp)}</p>
                     `;
                     container.appendChild(div);
                 }
@@ -184,4 +198,5 @@ function sendMessageHandler(event) {
         data: dummyData
     };
     host.Socket.send(JSON.stringify(body));
+    input.value = "";
 }
