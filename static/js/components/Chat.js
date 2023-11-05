@@ -10,6 +10,7 @@ export default class Chat extends HTMLElement {
     Target;
     Messages;
     Socket;
+    Offset = 10;   
 
     constructor(sender, target, socket) {
         super();
@@ -37,19 +38,29 @@ export default class Chat extends HTMLElement {
         console.log("Chat component added to DOM");
         this.shadowRoot.addEventListener("click", sendMessageHandler);
         this.shadowRoot.addEventListener("click", redirectHandler);
-        this.getMessagesAsync(this.Target.id).then( (res) => {
-            this.Messages = [];
-            for (const item of res) {
-                this.Messages.push(item);
-            }
+        const container = this.shadowRoot.getElementById("messages-container");
+        container.addEventListener("scroll", () => {
+            this.debounce(this.scrollReloadHandler, 100, container); 
+        });
+        if (!this.Messages) {
+            this.getMessagesAsync(this.Target.id, 0).then( (res) => {
+                console.log(this.Offset);
+                this.Messages = [];
+                for (const item of res) {
+                    this.Messages.push(item);
+                }
+                this.displayMessages();
+            })
+        } else {
             this.displayMessages();
-        })
+        }
+        
     }
 
     disconnectedCallback() {
         console.log("Chat component removed from DOM");
-        // this.shadowRoot.removeEventListener("click", sendMessageHandler);
-        // this.shadowRoot.addEventListener("click", redirectHandler);
+        this.shadowRoot.removeEventListener("click", sendMessageHandler);
+        this.shadowRoot.addEventListener("click", redirectHandler);
     }
 
     displayMessages() {
@@ -64,7 +75,7 @@ export default class Chat extends HTMLElement {
             <h3>${message.content}</h3>
             <p>${buildTimeString(message.timestamp)}</p>
             `;
-            messagesContainer.prepend(div);
+            messagesContainer.appendChild(div);
         }
     }
 
@@ -80,12 +91,39 @@ export default class Chat extends HTMLElement {
             }
             return
         }
-        this.Messages.push(message);
+        const msg = [message]
+        this.Messages = msg.concat(this.Messages);
     }
 
-    async getMessagesAsync(targetID) {
+    scrollReloadHandler(container) {
+        const root = container.getRootNode();
+        const host = root.host;
+        if(Math.abs((container.offsetHeight - container.scrollHeight)- container.scrollTop) < 5) {
+            console.log("Scrolled to top");
+            host.getMessagesAsync(host.Target.id, host.Offset).then((data) => {
+                for (const message of data) {
+                    host.Messages.push(message);
+                    const div = document.createElement("div");
+                    div.classList.add("message");
+                    div.innerHTML =
+                    `
+                    <h5>${message.author}</h5>
+                    <h3>${message.content}</h3>
+                    <p>${buildTimeString(message.timestamp)}</p>
+                    `;
+                    container.appendChild(div);
+                }
+            })
+            host.Offset += 10;
+        }
+    }
+
+    async getMessagesAsync(targetID, offset) {
         try {
-            const response = await fetch("/api/messages", {
+            const response = await fetch("/api/messages?" + new URLSearchParams({
+                limit: 10,
+                offset: offset,
+            }), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
@@ -104,6 +142,13 @@ export default class Chat extends HTMLElement {
             console.error("Error:", error);
             return null;
         }
+    }
+
+    debounce(method, delay, args) {
+        clearTimeout(method._tId);
+        method._tId= setTimeout(function(){
+            method(args);
+        }, delay);
     }
 }
 

@@ -2,7 +2,9 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"math"
 	"matthewhope/real-time-forum/auth"
 	"matthewhope/real-time-forum/repo"
 	"net/http"
@@ -37,7 +39,35 @@ func (h *ChatHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error.\n", http.StatusInternalServerError)
 		return
 	}
-	messages, err := h.Repo.GetMessagesBySenderAndTargetIDs(userID, targetID)
+	query := r.URL.Query()
+	fmt.Println(len(query))
+	for k, v := range query {
+		fmt.Println(k)
+		fmt.Println(v)
+	}
+	limit := math.MaxInt
+	offset := 0
+	limitVal := query.Get("limit")
+	if limitVal != "" {
+		var err error
+		limit, err = strconv.Atoi(limitVal)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+	}
+	offsetVal := query.Get("offset")
+	if offsetVal != "" {
+		var err error
+		offset, err = strconv.Atoi(offsetVal)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+	}
+	messages, err := h.Repo.GetLimitedMessagesBySenderAndTargetIDs(userID, targetID, limit, offset)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "internal server error.\n", http.StatusInternalServerError)

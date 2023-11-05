@@ -15,6 +15,8 @@
 }
 
 #messages-container {
+    display: flex;
+    flex-direction: column-reverse;
     box-sizing: border-box;
     border-radius: 5px;
     min-height: 75%;
