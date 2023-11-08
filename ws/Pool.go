@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"matthewhope/real-time-forum/dal"
 	"matthewhope/real-time-forum/repo"
 
 	"github.com/gorilla/websocket"
@@ -143,7 +142,7 @@ func (pool *Pool) Run() {
 					log.Fatal(err.Error())
 				}
 				d := p.Data
-				id, err := dal.CreatePost(d.AuthorID, d.Author, d.Content, d.Categories, d.Timestamp)
+				id, err := pool.Repo.CreatePost(d.AuthorID, d.Author, d.Content, d.Categories, d.Timestamp)
 				if err != nil {
 					log.Fatal(err.Error())
 				}
