@@ -15,6 +15,9 @@ func NewSQLiteRepository() *SQLiteRepository {
 func (r *SQLiteRepository) CreateComment(postID, authorID int, author, content string, timestamp int64) (int, error) {
 	return dal.CreateComment(postID, authorID, author, content, timestamp)
 }
+func CreateMessage(senderID, targetID int, author, content string, timestamp int64) (int, error) {
+	return dal.CreateMessage(senderID, targetID, author, content, timestamp)
+}
 func (r *SQLiteRepository) CreateUser(nickname, age, gender, firstName, lastName, emailAddress, password string) (int, error) {
 	return dal.CreateUser(nickname, age, gender, firstName, lastName, emailAddress, password)
 }
