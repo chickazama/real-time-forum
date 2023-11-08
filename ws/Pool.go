@@ -97,7 +97,7 @@ func (pool *Pool) Run() {
 					log.Fatal(err.Error())
 				}
 				d := dm.Data
-				id, err := dal.CreateMessage(d.SenderID, d.TargetID, d.Author, d.Content, d.Timestamp)
+				id, err := pool.Repo.CreateMessage(d.SenderID, d.TargetID, d.Author, d.Content, d.Timestamp)
 				if err != nil {
 					log.Fatal(err.Error())
 				}
