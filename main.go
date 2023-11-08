@@ -32,7 +32,6 @@ func main() {
 	fs := http.FileServer(fsRoot)
 	setupHandlers(mux)
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
-	mux.HandleFunc("/login", ui.Login)
 	mux.HandleFunc("/logout", ui.Logout)
 	mux.HandleFunc("/", ui.Index)
 	err := http.ListenAndServe(addr, mux)
@@ -49,4 +48,5 @@ func setupHandlers(mux *http.ServeMux) {
 	mux.Handle("/api/posts", api.NewPostsHandler(repository))
 	mux.Handle("/api/comments", api.NewCommentsHandler(repository))
 	mux.Handle("/signup", ui.NewSignupHandler(repository))
+	mux.Handle("/login", ui.NewLoginHandler(repository))
 }
