@@ -3,6 +3,7 @@ package repo
 import "matthewhope/real-time-forum/models"
 
 type IRepository interface {
+	CreateComment(postID, authorID int, author, content string, timestamp int64) (int, error)
 	CreateUser(nickname, age, gender, firstName, lastName, emailAddress, password string) (int, error)
 	GetUsers() ([]models.User, error)
 	GetUserByID(id int) (models.User, error)
