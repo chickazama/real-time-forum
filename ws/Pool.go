@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"matthewhope/real-time-forum/dal"
+	"matthewhope/real-time-forum/repo"
 
 	"github.com/gorilla/websocket"
 )
@@ -14,14 +15,16 @@ type Pool struct {
 	Logout    chan *Client
 	Clients   map[*Client]bool
 	Broadcast chan SocketMessage
+	Repo      repo.IRepository
 }
 
-func NewPool() *Pool {
+func NewPool(repo repo.IRepository) *Pool {
 	return &Pool{
 		Login:     make(chan *Client),
 		Logout:    make(chan *Client),
 		Clients:   make(map[*Client]bool),
 		Broadcast: make(chan SocketMessage),
+		Repo:      repo,
 	}
 }
 
@@ -118,7 +121,7 @@ func (pool *Pool) Run() {
 					log.Fatal(err.Error())
 				}
 				d := c.Data
-				id, err := dal.CreateComment(d.PostID, d.AuthorID, d.Author, d.Content, d.Timestamp)
+				id, err := pool.Repo.CreateComment(d.PostID, d.AuthorID, d.Author, d.Content, d.Timestamp)
 				if err != nil {
 					log.Fatal(err.Error())
 				}

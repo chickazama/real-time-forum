@@ -10,28 +10,31 @@ import (
 	"net/http"
 )
 
+var (
+	repository repo.IRepository
+)
+
 const (
 	addr = ":8080"
 )
 
 func init() {
 	dal.Init()
-	ws.Setup()
+	repository = repo.NewSQLiteRepository()
+	ws.Setup(repository)
 }
 
 func main() {
 	// Define multiplexer
 	mux := http.NewServeMux()
-	setupHandlers(mux)
 	// Define file-system root & serve static files
 	fsRoot := http.Dir("./static/")
 	fs := http.FileServer(fsRoot)
+	setupHandlers(mux)
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
-
 	mux.HandleFunc("/signup", ui.Signup)
 	mux.HandleFunc("/login", ui.Login)
 	mux.HandleFunc("/logout", ui.Logout)
-
 	mux.HandleFunc("/", ui.Index)
 	err := http.ListenAndServe(addr, mux)
 	if err != nil {
@@ -40,11 +43,10 @@ func main() {
 }
 
 func setupHandlers(mux *http.ServeMux) {
-	repo := repo.NewSQLiteRepository()
-	mux.Handle("/websocket", ws.NewWebSocketHandler(repo))
-	mux.Handle("/api/user", api.NewUserHandler(repo))
-	mux.Handle("/api/users", api.NewUsersHandler(repo))
-	mux.Handle("/api/messages", api.NewChatHandler(repo))
-	mux.Handle("/api/posts", api.NewPostsHandler(repo))
-	mux.Handle("/api/comments", api.NewCommentsHandler(repo))
+	mux.Handle("/websocket", ws.NewWebSocketHandler(repository))
+	mux.Handle("/api/user", api.NewUserHandler(repository))
+	mux.Handle("/api/users", api.NewUsersHandler(repository))
+	mux.Handle("/api/messages", api.NewChatHandler(repository))
+	mux.Handle("/api/posts", api.NewPostsHandler(repository))
+	mux.Handle("/api/comments", api.NewCommentsHandler(repository))
 }
