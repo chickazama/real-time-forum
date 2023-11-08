@@ -31,7 +31,7 @@ func main() {
 	serveStaticFiles(mux)
 	setupAPIHandlers(mux)
 	setupUIHandlers(mux)
-	err := http.ListenAndServe(addr, mux)
+	err := http.ListenAndServeTLS(addr, "server.crt", "server.key", mux)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

@@ -102,7 +102,7 @@ async function getPostsAsync() {
 }
 
 function setupWebSocket() {
-    socket = new WebSocket("ws://localhost:8080/websocket");
+    socket = new WebSocket("wss://localhost:8080/websocket");
     socket.onopen = () => {
         console.log("Socket opened.");
     }
