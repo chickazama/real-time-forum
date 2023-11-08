@@ -28,25 +28,33 @@ func main() {
 	// Define multiplexer
 	mux := http.NewServeMux()
 	// Define file-system root & serve static files
-	fsRoot := http.Dir("./static/")
-	fs := http.FileServer(fsRoot)
-	setupHandlers(mux)
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
-	mux.HandleFunc("/logout", ui.Logout)
-	mux.HandleFunc("/", ui.Index)
+	serveStaticFiles(mux)
+	setupAPIHandlers(mux)
+	setupUIHandlers(mux)
 	err := http.ListenAndServe(addr, mux)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 }
 
-func setupHandlers(mux *http.ServeMux) {
+func serveStaticFiles(mux *http.ServeMux) {
+	fsRoot := http.Dir("./static/")
+	fs := http.FileServer(fsRoot)
+	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+}
+
+func setupAPIHandlers(mux *http.ServeMux) {
 	mux.Handle("/websocket", ws.NewWebSocketHandler(repository))
 	mux.Handle("/api/user", api.NewUserHandler(repository))
 	mux.Handle("/api/users", api.NewUsersHandler(repository))
 	mux.Handle("/api/messages", api.NewChatHandler(repository))
 	mux.Handle("/api/posts", api.NewPostsHandler(repository))
 	mux.Handle("/api/comments", api.NewCommentsHandler(repository))
+}
+
+func setupUIHandlers(mux *http.ServeMux) {
 	mux.Handle("/signup", ui.NewSignupHandler(repository))
 	mux.Handle("/login", ui.NewLoginHandler(repository))
+	mux.Handle("/logout", ui.NewLogoutHandler(repository))
+	mux.HandleFunc("/", ui.Index)
 }

@@ -3,10 +3,19 @@ package ui
 import (
 	"log"
 	"matthewhope/real-time-forum/auth"
+	"matthewhope/real-time-forum/repo"
 	"net/http"
 )
 
-func Logout(w http.ResponseWriter, r *http.Request) {
+type LogoutHandler struct {
+	Repo repo.IRepository
+}
+
+func NewLogoutHandler(r repo.IRepository) *LogoutHandler {
+	return &LogoutHandler{Repo: r}
+}
+
+func (h *LogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed.\n", http.StatusMethodNotAllowed)
 		return
