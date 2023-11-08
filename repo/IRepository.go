@@ -3,6 +3,7 @@ package repo
 import "matthewhope/real-time-forum/models"
 
 type IRepository interface {
+	CreateUser(nickname, age, gender, firstName, lastName, emailAddress, password string) (int, error)
 	GetUsers() ([]models.User, error)
 	GetUserByID(id int) (models.User, error)
 	GetMessagesBySenderAndTargetIDs(userID, targetID int) ([]models.Message, error)

@@ -12,6 +12,9 @@ func NewSQLiteRepository() *SQLiteRepository {
 	return &SQLiteRepository{}
 }
 
+func (r *SQLiteRepository) CreateUser(nickname, age, gender, firstName, lastName, emailAddress, password string) (int, error) {
+	return dal.CreateUser(nickname, age, gender, firstName, lastName, emailAddress, password)
+}
 func (r *SQLiteRepository) GetUserByID(id int) (models.User, error) {
 	return dal.GetUserByID(id)
 }
