@@ -36,6 +36,10 @@ func (r *SQLiteRepository) GetUsers() ([]models.User, error) {
 	return dal.GetAllUsers()
 }
 
+func (r *SQLiteRepository) GetUserByNickname(nickname string) (models.User, error) {
+	return dal.GetUserByNickname(nickname)
+}
+
 func (r *SQLiteRepository) GetMessagesBySenderAndTargetIDs(senderID, targetID int) ([]models.Message, error) {
 	return dal.GetMessagesBySenderAndTargetIDs(senderID, targetID)
 }

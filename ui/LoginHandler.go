@@ -3,7 +3,6 @@ package ui
 import (
 	"log"
 	"matthewhope/real-time-forum/auth"
-	"matthewhope/real-time-forum/dal"
 	"matthewhope/real-time-forum/repo"
 	"matthewhope/real-time-forum/transport"
 	"net/http"
@@ -42,7 +41,7 @@ func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid details.\n", http.StatusBadRequest)
 		return
 	}
-	user, err := dal.GetUserByNickname(dto.Nickname)
+	user, err := h.Repo.GetUserByNickname(dto.Nickname)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "invalid details.\n", http.StatusBadRequest)

@@ -8,6 +8,7 @@ type IRepository interface {
 	CreatePost(authorID int, author, content, categories string, timestamp int64) (int, error)
 	CreateUser(nickname, age, gender, firstName, lastName, emailAddress, password string) (int, error)
 	GetUsers() ([]models.User, error)
+	GetUserByNickname(nickname string) (models.User, error)
 	GetUserByID(id int) (models.User, error)
 	GetMessagesBySenderAndTargetIDs(userID, targetID int) ([]models.Message, error)
 	GetLimitedMessagesBySenderAndTargetIDs(senderID, targetID, limit, offset int) ([]models.Message, error)
