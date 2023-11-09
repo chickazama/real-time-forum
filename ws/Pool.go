@@ -27,43 +27,47 @@ func NewPool(repo repo.IRepository) *Pool {
 	}
 }
 
+func (pool *Pool) userLogin(client *Client) {
+	pool.Clients[client] = true
+	joinedClient := User{
+		Code: CodeUserLogin,
+		Data: UserData{
+			ID:       client.ID,
+			Nickname: client.Nickname,
+		},
+	}
+	jsonRes, err := json.Marshal(&joinedClient)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	fmt.Println("Size of Connection Pool: ", len(pool.Clients))
+	onlineClients := Users{
+		Code: CodeListOnlineUsers,
+		Data: []UserData{},
+	}
+	// Notify all clients of a user join
+	for client := range pool.Clients {
+		nextClient := UserData{
+			ID:       client.ID,
+			Nickname: client.Nickname,
+		}
+		onlineClients.Data = append(onlineClients.Data, nextClient)
+		client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(jsonRes)})
+	}
+	// Tell this client all connected users
+	// msgBody := fmt.Sprintf("Users Online: %d", len(pool.Clients))
+	jsonBody, err := json.Marshal(&onlineClients)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(jsonBody)})
+}
+
 func (pool *Pool) Run() {
 	for {
 		select {
 		case client := <-pool.Login:
-			pool.Clients[client] = true
-			joinedClient := User{
-				Code: CodeUserLogin,
-				Data: UserData{
-					ID:       client.ID,
-					Nickname: client.Nickname,
-				},
-			}
-			jsonRes, err := json.Marshal(&joinedClient)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			fmt.Println("Size of Connection Pool: ", len(pool.Clients))
-			onlineClients := Users{
-				Code: CodeListOnlineUsers,
-				Data: []UserData{},
-			}
-			// Notify all clients of a user join
-			for client := range pool.Clients {
-				nextClient := UserData{
-					ID:       client.ID,
-					Nickname: client.Nickname,
-				}
-				onlineClients.Data = append(onlineClients.Data, nextClient)
-				client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(jsonRes)})
-			}
-			// Tell this client all connected users
-			// msgBody := fmt.Sprintf("Users Online: %d", len(pool.Clients))
-			jsonBody, err := json.Marshal(&onlineClients)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(jsonBody)})
+			pool.userLogin(client)
 		case client := <-pool.Logout:
 			disconnectedClient := User{
 				Code: CodeUserLogout,
