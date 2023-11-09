@@ -27,7 +27,7 @@ func NewPool(repo repo.IRepository) *Pool {
 	}
 }
 
-func (pool *Pool) userLogin(client *Client) {
+func (pool *Pool) handleUserLogin(client *Client) {
 	pool.Clients[client] = true
 	joinedClient := User{
 		Code: CodeUserLogin,
@@ -63,104 +63,120 @@ func (pool *Pool) userLogin(client *Client) {
 	client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(jsonBody)})
 }
 
+func (pool *Pool) handleUserLogout(client *Client) {
+	disconnectedClient := User{
+		Code: CodeUserLogout,
+		Data: UserData{
+			ID:       client.ID,
+			Nickname: client.Nickname,
+		},
+	}
+	jsonRes, err := json.Marshal(&disconnectedClient)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	delete(pool.Clients, client)
+	fmt.Println("Size of Connection Pool: ", len(pool.Clients))
+	// Notify all clients of a user logout
+	for client := range pool.Clients {
+		client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(jsonRes)})
+	}
+}
+
+func (pool *Pool) handleDirectMessage(message SocketMessage) {
+	var dm DirectMessage
+	err := json.Unmarshal([]byte(message.Body), &dm)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	d := dm.Data
+	id, err := pool.Repo.CreateMessage(d.SenderID, d.TargetID, d.Author, d.Content, d.Timestamp)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	dm.Data.ID = id
+	body, err := json.Marshal(&dm)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	for client := range pool.Clients {
+		if client.ID == dm.Data.SenderID || client.ID == dm.Data.TargetID {
+			if err := client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(body)}); err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
+	}
+}
+
+func (pool *Pool) handleComment(message SocketMessage) {
+	var c Comment
+	err := json.Unmarshal([]byte(message.Body), &c)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	d := c.Data
+	id, err := pool.Repo.CreateComment(d.PostID, d.AuthorID, d.Author, d.Content, d.Timestamp)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	c.Data.ID = id
+	body, err := json.Marshal(&c)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	for client := range pool.Clients {
+		if err := client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(body)}); err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+}
+
+func (pool *Pool) handlePost(message SocketMessage) {
+	var p Post
+	err := json.Unmarshal([]byte(message.Body), &p)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	d := p.Data
+	id, err := pool.Repo.CreatePost(d.AuthorID, d.Author, d.Content, d.Categories, d.Timestamp)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	p.Data.ID = id
+	body, err := json.Marshal(&p)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	for client := range pool.Clients {
+		if err := client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(body)}); err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+}
+
 func (pool *Pool) Run() {
 	for {
 		select {
 		case client := <-pool.Login:
-			pool.userLogin(client)
+			pool.handleUserLogin(client)
 		case client := <-pool.Logout:
-			disconnectedClient := User{
-				Code: CodeUserLogout,
-				Data: UserData{
-					ID:       client.ID,
-					Nickname: client.Nickname,
-				},
-			}
-			jsonRes, err := json.Marshal(&disconnectedClient)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			delete(pool.Clients, client)
-			fmt.Println("Size of Connection Pool: ", len(pool.Clients))
-			// Notify all clients of a user logout
-			for client := range pool.Clients {
-				client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(jsonRes)})
-			}
-		case message := <-pool.Broadcast:
+			pool.handleUserLogout(client)
+		case socketMsg := <-pool.Broadcast:
 			var body MessageBody
-			err := json.Unmarshal([]byte(message.Body), &body)
+			err := json.Unmarshal([]byte(socketMsg.Body), &body)
 			if err != nil {
 				log.Fatal(err.Error())
 			}
 			switch body.Code {
 			case CodeDirectMessage:
-				var dm DirectMessage
-				err = json.Unmarshal([]byte(message.Body), &dm)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				d := dm.Data
-				id, err := pool.Repo.CreateMessage(d.SenderID, d.TargetID, d.Author, d.Content, d.Timestamp)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				dm.Data.ID = id
-				body, err := json.Marshal(&dm)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				for client := range pool.Clients {
-					if client.ID == dm.Data.SenderID || client.ID == dm.Data.TargetID {
-						if err := client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(body)}); err != nil {
-							fmt.Println(err)
-							return
-						}
-					}
-				}
+				pool.handleDirectMessage(socketMsg)
 			case CodeNewComment:
-				var c Comment
-				err = json.Unmarshal([]byte(message.Body), &c)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				d := c.Data
-				id, err := pool.Repo.CreateComment(d.PostID, d.AuthorID, d.Author, d.Content, d.Timestamp)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				c.Data.ID = id
-				body, err := json.Marshal(&c)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				for client := range pool.Clients {
-					if err := client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(body)}); err != nil {
-						fmt.Println(err)
-						return
-					}
-				}
+				pool.handleComment(socketMsg)
 			case CodeNewPost:
-				var p Post
-				err = json.Unmarshal([]byte(message.Body), &p)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				d := p.Data
-				id, err := pool.Repo.CreatePost(d.AuthorID, d.Author, d.Content, d.Categories, d.Timestamp)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				p.Data.ID = id
-				body, err := json.Marshal(&p)
-				if err != nil {
-					log.Fatal(err.Error())
-				}
-				for client := range pool.Clients {
-					if err := client.Conn.WriteJSON(SocketMessage{Type: websocket.TextMessage, Body: string(body)}); err != nil {
-						fmt.Println(err)
-						return
-					}
-				}
+				pool.handlePost(socketMsg)
 			}
 		}
 	}
